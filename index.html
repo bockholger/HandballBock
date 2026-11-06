@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="de"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Handball"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="theme-color" content="#14213d"><title>Handball Spielanalyse</title>
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png">
+<style>
+:root{--f:"Avenir Next Condensed","Barlow Semi Condensed",system-ui,-apple-system,"Segoe UI",sans-serif;--bg:#eef1f4;--sf:#fff;--tx:#14213d;--mu:#5b6678;--ln:#d3d9e1;--ac:#e8590c;--on:#fff;--bl:#1b4b8f;--ok:#1f7a4d;--bad:#b3261e;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1523;--sf:#172136;--tx:#e8edf5;--mu:#98a4b9;--ln:#2a3a56;--ac:#ff8a4a;--on:#1a1206;--bl:#8ab6ff;--ok:#5ad39b;--bad:#ff8f86}}
+:root[data-theme="dark"]{--bg:#0e1523;--sf:#172136;--tx:#e8edf5;--mu:#98a4b9;--ln:#2a3a56;--ac:#ff8a4a;--on:#1a1206;--bl:#8ab6ff;--ok:#5ad39b;--bad:#ff8f86}
+html{color-scheme:light dark;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.4 var(--f)}
+header{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--tx);color:var(--bg);display:flex;align-items:center;gap:6px;padding:8px 12px;flex-wrap:wrap}
+header h1{font-size:19px;margin:0 auto 0 0;letter-spacing:.2px}
+header button{background:transparent;color:inherit;border:0;border-bottom:3px solid transparent;font:600 16px var(--f);padding:6px 10px;cursor:pointer}
+header button.on{border-color:var(--ac)}
+main{max-width:980px;margin:0 auto;padding:12px}
+section{background:var(--sf);border:1px solid var(--ln);border-radius:6px;padding:12px;margin-bottom:12px}
+h2{font-size:20px;margin:0 0 8px}h3{font-size:16px;margin:12px 0 4px;color:var(--mu)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.chip,.btn{font:600 16px var(--f);border:1.5px solid var(--ln);background:var(--sf);color:var(--tx);border-radius:4px;padding:9px 13px;cursor:pointer;min-height:42px}
+.chip.on{background:var(--bl);color:#fff;border-color:var(--bl)}
+.btn{background:var(--ac);color:var(--on);border-color:var(--ac)}.btn.sec{background:var(--sf);color:var(--tx);border-color:var(--ln)}.btn.del{color:var(--bad)}
+.chip:focus-visible,.btn:focus-visible,input:focus-visible,select:focus-visible,header button:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+input,select{font:inherit;padding:8px;border:1.5px solid var(--ln);border-radius:4px;background:var(--bg);color:var(--tx);min-height:42px;max-width:100%}
+label{display:flex;flex-direction:column;font-size:14px;color:var(--mu);gap:2px}
+.score{font:700 44px/1 var(--f);display:flex;gap:14px;align-items:baseline}.score small{font-size:16px;color:var(--mu);font-weight:400}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:360px}
+.grid3 .chip{padding:14px 4px}
+.msg{color:var(--bad);min-height:20px}
+table{border-collapse:collapse;width:100%;font-size:15px}td,th{border-bottom:1px solid var(--ln);padding:4px 6px;text-align:left}th{color:var(--mu);font-weight:600}td.n,th.n{text-align:right}
+.two{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:12px}
+.log{max-height:260px;overflow:auto;font-size:15px}.log div{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid var(--ln);padding:4px 0}
+.opp{border-left:5px solid var(--bad)}.own{border-left:5px solid var(--ok)}
+.muted{color:var(--mu)}
+.tag{display:inline-block;padding:1px 7px;border-radius:3px;background:var(--bg);margin-right:4px}
+.hm td{text-align:center;font-weight:700;height:40px}
+.goal{position:relative;width:min(100%,420px);padding:18px 18px 0;border-bottom:3px solid var(--mu)}
+.goal i{position:absolute;box-shadow:0 0 0 1px rgba(0,0,0,.4)}
+.goal .cb{left:0;right:0;top:0;height:18px;background:repeating-linear-gradient(90deg,#d62828 0 40px,#fff 40px 80px)}
+.goal .lp,.goal .rp{top:0;bottom:0;width:18px;background:repeating-linear-gradient(180deg,#d62828 0 40px,#fff 40px 80px)}
+.goal .lp{left:0}.goal .rp{right:0}
+.goal .gc{display:grid;grid-template-columns:repeat(3,1fr);background:repeating-linear-gradient(45deg,transparent 0 7px,var(--ln) 7px 8px),repeating-linear-gradient(-45deg,transparent 0 7px,var(--ln) 7px 8px)}
+.goal .gc .chip{border-radius:0;height:84px;background:transparent;border:1px dashed var(--mu);padding:4px}
+.goal .gc .chip.on{background:var(--bl);border-style:solid}
+
+button{touch-action:manipulation;-webkit-user-select:none;user-select:none}
+body.fit{height:100dvh;overflow:hidden;display:flex;flex-direction:column}
+body.fit header{padding:4px 10px}
+body.fit main{flex:1;min-height:0;width:100%;max-width:none;padding:8px;display:flex;flex-direction:column;gap:8px;overflow:hidden}
+.sb{display:grid;grid-template-columns:1fr auto 1fr auto;align-items:center;gap:14px;background:var(--tx);color:var(--bg);border-radius:8px;padding:4px 16px}
+.sb small{display:block;font-size:15px;opacity:.85;text-transform:uppercase;letter-spacing:1px}
+.sb .tm b{display:block;font:700 78px/1 var(--f);font-variant-numeric:tabular-nums}.sb .tm.r{text-align:right}
+.sb .mid{text-align:center}.sb #clk{font:700 132px/1 var(--f);font-variant-numeric:tabular-nums;letter-spacing:2px;background:#000;color:#ffd23f;border-radius:8px;padding:2px 22px}.sb #clk.run{color:#5dff9a}
+.sb .ctl{display:flex;flex-direction:column;gap:4px}.sb .ctl .btn{padding:3px 10px;min-height:34px;font-size:14px}
+.lv{flex:1;min-height:0;display:grid;grid-template-columns:1fr 340px;gap:8px}
+.lf,.lr{background:var(--sf);border:1px solid var(--ln);border-radius:6px;padding:8px;min-height:0;overflow:auto}
+.lv.opp .lf{border-left:6px solid var(--bad)}.lv.own .lf{border-left:6px solid var(--ok)}
+.lr{display:flex;flex-direction:column;gap:6px}.lr .msg{min-height:0;margin:0}
+.fr{display:flex;gap:8px;align-items:center;margin-bottom:6px}.fl{width:92px;flex:none;font-size:14px;color:var(--mu);font-weight:600}.fc{display:flex;gap:6px;flex-wrap:wrap}
+.lf .chip{padding:5px 10px;min-height:44px}
+.btn.big{min-height:60px;font-size:22px;width:100%;flex:none}
+.lr .log{flex:1;min-height:60px;max-height:none;overflow:auto;font-size:14px}
+.lr .goal .gc .chip{height:62px}
+@media (max-aspect-ratio:1/1){.lv{grid-template-columns:1fr;grid-template-rows:auto 1fr}}
+@media print{header,.noprint{display:none!important}body{background:#fff}main{padding:0}section{break-inside:avoid}}
+</style></head>
+<body>
+<header><h1>Handball Spielanalyse</h1>
+<button data-tab="live">Live</button><button data-tab="eval">Auswertung</button><button data-tab="kader">Kader</button><button data-tab="games">Spiele</button></header>
+<main id="app"></main>
+<script>
+const POS=['Tor','Linksaußen','Rückraum links','Rückraum Mitte','Rückraum rechts','Rechtsaußen','Kreis'];
+const DIST=['6 m','7 m','9 m','über 9 m'],VER=['hoch','halbhoch','unten'],HOR=['kurz','zentral','lang'];
+const ART=['Positionsangriff','Gegenstoß','erweiterter Gegenstoß'];
+const RES={save:'Parade',post:'Pfosten/Latte',off:'Vorbei',block:'Geblockt'},TL={goal:'Tor',loss:'Ballverlust',miss:'Fehlwurf',susp:'Strafe'};
+const cur=g=>(g.sec||0)+(g.run?(Date.now()-g.run)/1000:0),minute=g=>Math.floor(cur(g)/60)+1;
+const fmt=g=>{const s=Math.floor(cur(g));return String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0')};
+setInterval(()=>{const c=document.querySelector('#clk'),g=game();if(c&&g)c.textContent=fmt(g)},1000);
+const S={players:[],fields:[],games:[],cur:null};let tab='live',D=newDraft(),msg='',editId=null,evalSel='all',db=null,dbOk=true;
+const $=s=>document.querySelector(s),esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function newDraft(keepTeam,keepArt){return{team:keepTeam||'opp',art:keepArt||ART[0],type:'goal'}}
+/* Datenbank: IndexedDB im Browser */
+function dbOpen(){return new Promise(r=>{try{const q=indexedDB.open('handball-analyse',1);q.onupgradeneeded=()=>q.result.createObjectStore('kv');q.onsuccess=()=>r(q.result);q.onerror=()=>r(null)}catch(e){r(null)}})}
+async function load(){db=await dbOpen();if(!db){dbOk=false;return}await new Promise(r=>{const g=db.transaction('kv').objectStore('kv').get('app');g.onsuccess=()=>{if(g.result)Object.assign(S,g.result);r()};g.onerror=r})}
+function save(){if(!db)return;try{db.transaction('kv','readwrite').objectStore('kv').put(JSON.parse(JSON.stringify(S)),'app')}catch(e){dbOk=false}}
+const pl=id=>S.players.find(p=>p.id===id),pn=id=>pl(id)?pl(id).name:'?',game=()=>S.games.find(g=>g.id===S.cur);
+const chips=(k,opts,v)=>opts.map(o=>{const[val,l]=Array.isArray(o)?o:[o,o];return`<button class="chip ${v===val?'on':''}" data-set="${k}" data-v="${esc(val)}">${esc(l)}</button>`}).join('');
+const plChips=(k,v)=>S.players.length?chips(k,S.players.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p=>[p.id,p.name]),v):'<span class="muted">Zuerst Spieler im Kader anlegen.</span>';
+function render(){document.body.classList.toggle('fit',tab==='live'&&!!game());document.querySelectorAll('header button').forEach(b=>b.classList.toggle('on',b.dataset.tab===tab));$('#app').innerHTML={live:vLive,eval:vEval,kader:vKader,games:vGames}[tab]();}
+/* Live */
+function score(g){let o=0,e=0;g.events.forEach(x=>{if(x.type==='goal')x.team==='own'?o++:e++});return[o,e]}
+function vLive(){const g=game();if(!g)return`<section><h2>Neues Spiel</h2><div class="row"><label>Gegner<input id="gopp" placeholder="Name des Gegners"></label><label>Datum<input id="gdate" type="date" value="${new Date().toISOString().slice(0,10)}"></label><button class="btn" data-act="newgame">Spiel starten</button></div><p class="muted">Offene Spiele findest du unter „Spiele“. ${backupNote()}</p></section>`;
+const[o,e]=score(g),opp=D.team==='opp',susp=D.type==='susp',gm=D.type==='goal'||D.type==='miss';
+const row=(l,c)=>`<div class="fr"><span class="fl">${l}</span><div class="fc">${c}</div></div>`;
+const nr=`<input type="number" id="nr" min="0" max="99" inputmode="numeric" placeholder="Nr." value="${esc(D.nr)}" style="width:96px;font-size:24px">`;
+const gkc=S.players.filter(p=>p.pos==='Tor').map(p=>[p.id,p.name]);let L='';
+if(!susp)L+=row('Angriff',chips('team',[['opp','Gegner'],['own','Wir']],D.team))+row('Art',chips('art',ART,D.art));
+L+=row('Ereignis',chips('type',[['goal','Tor'],['loss','Ballverlust'],['miss','Fehlwurf'],['susp','Strafe']],D.type));
+if(susp){L+=row('Bestraft',chips('pt',[['opp','Gegner'],['own','Wir']],D.pt))+row('Strafe',chips('sk',['2 Minuten','Rote Karte'],D.sk));
+ if(D.pt==='own')L+=row('Spieler',plChips('by',D.by));else if(D.pt==='opp')L+=row('Gegner Nr.',nr)}
+else if(gm){if(D.type==='miss')L+=row('Wurf',chips('res',Object.entries(RES),D.res));
+ L+=row(opp?'Gegner Nr.':'Schütze',opp?nr:plChips('shooter',D.shooter))+row('Position',chips('pos',POS.slice(1),D.pos))+row('Abstand',chips('dist',DIST,D.dist));
+ if(opp&&gkc.length)L+=row('Torhüter',chips('gk',gkc,D.gk))}
+else{L+=row('Ursache',chips('cause',opp?[['prov','Fehler provoziert'],['steal','Ball gestohlen'],['tech','Technischer Fehler']]:[['prov','Fehler provoziert'],['steal','Ball gestohlen'],['tech','Technischer Fehler']],D.cause));
+ if(D.cause==='prov'||D.cause==='steal')L+=opp?row('Eigener Sp.',plChips('by',D.by)):row('Gegner Nr.',nr);
+ if(D.cause==='tech')L+=opp?row('Gegner Nr.',nr):row('Eigener Sp.',plChips('by',D.by));
+ L+=`<p class="muted" style="margin:4px 0">${opp?'Gegner im Angriff: Fehler provoziert oder Ball gestohlen durch einen eigenen Spieler.':'Wir im Angriff: Fehler provoziert oder Ball gestohlen durch eine gegnerische Nummer; technischer Fehler optional mit eigenem Spieler.'}</p>`}
+const cells=VER.map(v=>HOR.map(h=>`<button class="chip ${D.v===v&&D.h===h?'on':''}" data-grid="${v}|${h}">${v}<br>${h}</button>`).join('')).join('');
+const goal=gm?`<div class="goal"><i class="cb"></i><i class="lp"></i><i class="rp"></i><div class="gc">${cells}</div></div><small class="muted">Wurfziel${D.type==='miss'?' (optional)':''} · Blick vom Werfer: kurz = nah, lang = fern</small>`:'';
+const log=g.events.slice().reverse().map(x=>`<div class="${x.team}"><span>${x.min?x.min+'. Min · ':''}${(x.type==='susp'?x.pt:x.team)==='own'?'Wir':'Gegner'} · ${TL[x.type]} · ${esc(descr(x))}</span><button class="chip" style="min-height:34px;padding:2px 10px;color:var(--bad)" data-undo="${x.id}" aria-label="Löschen">×</button></div>`).join('')||'<span class="muted">Noch keine Ereignisse.</span>';
+return`<div class="sb"><div class="tm"><small>Wir</small><b>${o}</b></div><div class="mid"><div id="clk" class="${g.run?'run':''}">${fmt(g)}</div><small>${g.run?'● Uhr läuft':'■ Uhr steht'} · ${g.half||1}. Halbzeit · ${g.date}</small></div><div class="tm r"><small>${esc(g.opp)}</small><b>${e}</b></div><div class="ctl"><button class="btn" data-act="clock">${g.run?'Uhr stoppen':'Uhr starten'}</button><button class="btn sec" data-act="half">${(g.half||1)===1?'2. Halbzeit':'Zur 1. HZ'}</button><button class="btn sec" data-act="closegame">Schließen</button></div></div>
+<div class="lv ${susp?(D.pt||'own'):D.team}"><div class="lf">${L}</div><div class="lr">${goal}<p class="msg">${esc(msg)}</p><button class="btn big" data-act="saveev">Speichern</button><div class="log">${log}</div></div></div>`}
+const backupNote=()=>S.lastBackup?'Letzte Sicherung: '+new Date(S.lastBackup).toLocaleString('de-DE'):'Noch keine Sicherung erstellt.';
+function descr(x){const w=n=>n!==undefined&&n!==''?'Nr. '+n:'';if(x.type==='susp')return`${x.sk} · ${x.pt==='own'?pn(x.by):w(x.nr)}`;if(x.type==='miss')return`${x.art} · ${x.team==='own'?pn(x.shooter):w(x.nr)} · ${RES[x.res]} · ${x.pos}, ${x.dist}${x.v?', '+x.v+'/'+x.h:''}`;if(x.type==='goal')return`${x.art} · ${x.team==='own'?pn(x.shooter):w(x.nr)} · ${x.pos}, ${x.dist}, ${x.v}/${x.h}`;
+const c={prov:'provoziert',steal:'gestohlen',tech:'technischer Fehler'}[x.cause];return`${x.art} · ${c}${x.team==='opp'?(x.by?' von '+pn(x.by):x.nr?' ('+w(x.nr)+')':''):(x.nr?' von '+w(x.nr):x.by?' ('+pn(x.by)+')':'')}`}
+function saveEv(){const g=game(),nr=D.nr===undefined||D.nr===''?undefined:Number(D.nr),opp=D.team==='opp',e={id:uid(),t:new Date().toISOString(),min:minute(g),sec:Math.floor(cur(g)),half:g.half||1,team:D.team,art:D.art,type:D.type};
+if(D.type==='susp'){const po=D.pt==='own';if(!D.pt||!D.sk||(po?!D.by:nr===undefined)){msg='Bitte bestrafte Seite, Strafe und Spieler bzw. Nummer wählen.';return render()}Object.assign(e,{pt:D.pt,sk:D.sk,art:''});po?e.by=D.by:e.nr=nr;g.events.push(e);save();D=newDraft(D.team,D.art);msg='';return render()}
+if(D.type==='goal'||D.type==='miss'){const miss=D.type==='miss',who=opp?nr!==undefined:D.shooter;if(!who||!D.pos||!D.dist||(miss?!D.res:(!D.v||!D.h))){msg=opp?'Bitte Nummer, Position, Abstand und Wurfziel wählen.':'Bitte Torschütze, Position, Abstand und Wurfziel wählen.';return render()}
+ Object.assign(e,{pos:D.pos,dist:D.dist,v:D.v,h:D.h});if(miss)e.res=D.res;if(opp&&D.gk)e.gk=D.gk;opp?e.nr=nr:e.shooter=D.shooter}
+else{if(!D.cause){msg='Bitte die Ursache wählen.';return render()}
+ if(D.cause!=='tech'&&(opp?!D.by:nr===undefined)){msg=opp?'Bitte den eigenen Spieler wählen.':'Bitte die gegnerische Nummer eingeben.';return render()}
+ e.cause=D.cause;if(D.by)e.by=D.by;if(nr!==undefined)e.nr=nr}
+g.events.push(e);save();D=newDraft(D.team,D.art);msg='';render()}
+/* Kader */
+function vKader(){const p=S.players.find(x=>x.id===editId)||{};
+const ff=S.fields.map(f=>`<label>${esc(f)}<input data-cf="${esc(f)}" value="${esc((p.extra||{})[f])}"></label>`).join('');
+const rows=S.players.map(x=>`<tr><td>${esc(x.name)}</td><td>${esc(x.hand)}</td><td>${esc(x.born||'')}</td><td>${esc(x.pos)}</td>${S.fields.map(f=>`<td>${esc((x.extra||{})[f]||'')}</td>`).join('')}<td class="n"><button class="btn sec" data-edit="${x.id}">Bearbeiten</button> <button class="btn sec del" data-delp="${x.id}">Löschen</button></td></tr>`).join('');
+return`<section><h2>${editId?'Spieler bearbeiten':'Spieler hinzufügen'}</h2><div class="row"><label>Name<input id="pname" value="${esc(p.name)}"></label>
+<label>Wurfhand<select id="phand">${['Rechts','Links'].map(h=>`<option ${p.hand===h?'selected':''}>${h}</option>`).join('')}</select></label>
+<label>Geburtsdatum oder -jahr (optional)<input id="pborn" placeholder="TT.MM.JJJJ oder JJJJ" value="${esc(p.born)}"></label>
+<label>Position<select id="ppos">${POS.map(h=>`<option ${p.pos===h?'selected':''}>${h}</option>`).join('')}</select></label>${ff}
+<button class="btn" data-act="savep">${editId?'Änderungen speichern':'Spieler speichern'}</button>${editId?'<button class="btn sec" data-act="cancelp">Abbrechen</button>':''}</div><p class="msg">${esc(msg)}</p></section>
+<section><h2>Zusätzliche Kategorien</h2><div class="row"><input id="newf" placeholder="z. B. Trikotnummer, Größe"><button class="btn" data-act="addf">Kategorie hinzufügen</button></div>
+<div class="row" style="margin-top:8px">${S.fields.map(f=>`<span class="tag">${esc(f)} <button class="chip del" data-delf="${esc(f)}" style="min-height:0;padding:0 6px">×</button></span>`).join('')||'<span class="muted">Noch keine eigenen Kategorien.</span>'}</div></section>
+<section><h2>Kader (${S.players.length})</h2><div style="overflow-x:auto"><table><tr><th>Name</th><th>Hand</th><th>Geburt</th><th>Position</th>${S.fields.map(f=>`<th>${esc(f)}</th>`).join('')}<th></th></tr>${rows||'<tr><td class="muted">Noch keine Spieler.</td></tr>'}</table></div></section>`}
+function saveP(){const name=$('#pname').value.trim(),born=$('#pborn').value.trim();
+if(!name){msg='Bitte einen Namen eingeben.';return render()}
+if(born&&!/^\d{4}$/.test(born)&&!/^\d{1,2}\.\d{1,2}\.\d{4}$/.test(born)){msg='Geburtsdatum bitte als TT.MM.JJJJ oder nur als Jahr JJJJ eingeben.';return render()}
+const extra={};document.querySelectorAll('[data-cf]').forEach(i=>extra[i.dataset.cf]=i.value.trim());
+const p={id:editId||uid(),name,hand:$('#phand').value,born,pos:$('#ppos').value,extra};
+const i=S.players.findIndex(x=>x.id===p.id);i<0?S.players.push(p):S.players[i]=p;editId=null;msg='';save();render()}
+/* Auswertung */
+const tally=(a,f)=>{const m={};a.forEach(x=>{const k=f(x);if(k!==undefined&&k!=='')m[k]=(m[k]||0)+1});return Object.entries(m).sort((a,b)=>b[1]-a[1])};
+const tbl=(t,a)=>`<h3>${t}</h3>${a.length?`<table>${a.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="n">${v}</td></tr>`).join('')}</table>`:'<span class="muted">Keine Daten.</span>'}`;
+function team(t,ev){const opp=t==='opp',E=ev.filter(x=>x.team===t),G=E.filter(x=>x.type==='goal'),L=E.filter(x=>x.type==='loss'),M=E.filter(x=>x.type==='miss');
+const mx=Math.max(1,...VER.flatMap(v=>HOR.map(h=>G.filter(x=>x.v===v&&x.h===h).length)));
+const hm=`<h3>Wurfziel</h3><table class="hm"><tr><th></th>${HOR.map(h=>`<th style="text-align:center">${h}</th>`).join('')}</tr>${VER.map(v=>`<tr><th>${v}</th>${HOR.map(h=>{const n=G.filter(x=>x.v===v&&x.h===h).length;return`<td style="background:color-mix(in srgb,var(--ac) ${Math.round(n/mx*80)}%,transparent)">${n}</td>`}).join('')}</tr>`).join('')}</table>`;
+const lc={prov:'Fehler provoziert',steal:'Ball gestohlen',tech:'Technischer Fehler'};
+return`<section class="${opp?'opp':'own'}"><h2>${opp?'Gegner im Angriff':'Wir im Angriff'}: ${G.length} Tore bei ${G.length+M.length} Würfen (${G.length+M.length?Math.round(G.length/(G.length+M.length)*100):0} %), ${L.length} Ballverluste</h2><div class="two"><div>
+${tbl('Tore nach Angriffsart',tally(G,x=>x.art))}${tbl('Tore nach Position',tally(G,x=>x.pos))}${tbl('Tore nach Abstand',tally(G,x=>x.dist))}${hm}${tbl(opp?'Tore je Gegner (Nr.)':'Tore je Spieler',tally(G,x=>opp?'Nr. '+x.nr:pn(x.shooter)))}</div><div>
+${tbl('Fehlwürfe nach Ergebnis',tally(M,x=>RES[x.res]))}${tbl('Ballverluste nach Angriffsart',tally(L,x=>x.art))}${tbl('Ballverluste nach Ursache',tally(L,x=>lc[x.cause]))}
+${opp?tbl('Fehler provoziert (eigene Spieler)',tally(L.filter(x=>x.cause==='prov'),x=>pn(x.by)))+tbl('Bälle gestohlen (eigene Spieler)',tally(L.filter(x=>x.cause==='steal'),x=>pn(x.by))):tbl('Provoziert/gestohlen von Gegner (Nr.)',tally(L.filter(x=>x.cause!=='tech'),x=>'Nr. '+x.nr))+tbl('Technische Fehler (eigene Spieler)',tally(L.filter(x=>x.cause==='tech'&&x.by),x=>pn(x.by)))}</div></div></section>`}
+function vEval(){const gs=evalSel==='all'?S.games:S.games.filter(g=>g.id===evalSel),ev=gs.flatMap(g=>g.events.map(x=>({...x,ph:phase(g,x)})));
+return`<section class="noprint"><h2>Auswertung</h2><label>Spiel<select id="esel"><option value="all">Alle Spiele (${S.games.length})</option>${S.games.map(g=>`<option value="${g.id}" ${evalSel===g.id?'selected':''}>${g.date} gegen ${esc(g.opp)}</option>`).join('')}</select></label><p class="muted">${ev.length} Ereignisse</p><button class="btn" data-act="pdf">Auswertung drucken / als PDF sichern</button><p class="msg">${esc(msg)}</p></section><div id="evpdf"><h2 style="margin:4px 0 8px">${esc(evTitle())}</h2>${team('opp',ev)}${gkv(ev)}${team('own',ev)}${phases(ev)}${pen(ev)}</div>`}
+/* Spiele & Datenhaltung */
+function vGames(){const rows=S.games.slice().reverse().map(g=>{const[o,e]=score(g);return`<tr><td>${g.date}</td><td>${esc(g.opp)}</td><td>${o}:${e}</td><td class="n"><button class="btn sec" data-open="${g.id}">Öffnen</button> <button class="btn sec del" data-delg="${g.id}">Löschen</button></td></tr>`}).join('');
+return`<section><h2>Gespeicherte Spiele</h2><table>${rows||'<tr><td class="muted">Noch keine Spiele.</td></tr>'}</table></section>
+<section><h2>Datensicherung</h2><p class="muted">${dbOk?'Die Daten liegen lokal auf diesem Gerät im Browser-Speicher und werden automatisch gespeichert.':'Der Browser-Speicher ist nicht verfügbar. Daten gehen beim Schließen verloren.'} Safari löscht Webdaten nach etwa 7 Tagen ohne Nutzung, außer die App ist zum Home-Bildschirm hinzugefügt. Sichere deshalb regelmäßig in der Dateien-App. ${backupNote()}</p>
+<div class="row"><button class="btn" data-act="export">In Dateien sichern (JSON)</button><button class="btn sec" data-act="csv">Ereignisse als Excel-Tabelle (CSV)</button><label>Sicherung wiederherstellen (ersetzt alle Daten)<input type="file" id="imp" accept=".json,application/json"></label></div><p class="msg">${esc(msg)}</p></section>`}
+async function doExport(){const data=JSON.stringify({players:S.players,fields:S.fields,games:S.games},null,1);try{await saveFile('handball-analyse.json',new Blob([data],{type:'application/json'}));msg='';S.lastBackup=Date.now();save()}catch(e){msg=e&&e.code==='declined'?'':'Der Export ist in dieser Ansicht nicht verfügbar.'}render()}
+function phase(g,x){if(x.sec===undefined||x.type==='susp')return;const n=t=>g.events.filter(y=>y.type==='susp'&&y.pt===t&&y.sec!==undefined&&y.sec<=x.sec&&x.sec<y.sec+120).length,a=n('own'),b=n('opp');return b>a?'Überzahl':a>b?'Unterzahl':'Gleichzahl'}
+function gkv(ev){const O=ev.filter(x=>x.team==='opp'&&(x.type==='goal'||(x.type==='miss'&&x.res==='save')));
+const q=a=>{const t=a.filter(x=>x.type==='goal').length,s=a.length-t;return[t,s,t+s?Math.round(s/(t+s)*100)+' %':'–']};
+const grp=(k,keys)=>keys.map(n=>[n,...q(O.filter(x=>k(x)===n))]).filter(r=>r[1]+r[2]>0);
+const tb=(t,rows)=>`<h3>${t}</h3>${rows.length?`<table><tr><th></th><th class="n">Gegentore</th><th class="n">Paraden</th><th class="n">Quote</th></tr>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td class="n">${r[1]}</td><td class="n">${r[2]}</td><td class="n">${r[3]}</td></tr>`).join('')}</table>`:'<span class="muted">Keine Daten.</span>'}`;
+const gks=[...new Set(O.map(x=>x.gk).filter(Boolean))];
+return`<section><h2>Torhüter: Paraden und Gegentore</h2><div class="two"><div>${tb('Je Torhüter',grp(x=>x.gk,gks).map(r=>[pn(r[0]),...r.slice(1)]))}${tb('Nach Abstand',grp(x=>x.dist,DIST))}</div><div>${tb('Nach Wurfposition',grp(x=>x.pos,POS.slice(1)))}</div></div><p class="muted">Quote = Paraden geteilt durch Würfe aufs Tor (Tore plus Paraden). Erfasst sind nur Gegner-Angriffe. Ohne gewählten Torhüter erscheint ein Wurf nur in den Zonen-Tabellen.</p></section>`}
+function phases(ev){const rows=['Überzahl','Gleichzahl','Unterzahl'].map(r=>{const a=ev.filter(x=>x.ph===r),c=(t,ty)=>a.filter(x=>x.team===t&&x.type===ty).length,ow=c('own','goal'),gg=c('opp','goal');return`<tr><td>${r}</td><td class="n">${ow}/${ow+c('own','miss')}</td><td class="n">${gg}/${gg+c('opp','miss')}</td><td class="n">${c('own','loss')}</td><td class="n">${c('opp','loss')}</td></tr>`}).join('');
+return`<section><h2>Über- und Unterzahl (aus unserer Sicht)</h2><table><tr><th>Phase</th><th class="n">Eigene Tore/Würfe</th><th class="n">Gegentore/Würfe</th><th class="n">Eigene Ballverluste</th><th class="n">Gegner-Ballverluste</th></tr>${rows}</table><p class="muted">Berechnet aus der Spieluhr: Jede Strafe zählt 2 Minuten ab dem Zeitpunkt der Erfassung. Ereignisse aus Spielen vor dieser Funktion fehlen hier.</p></section>`}
+function pen(ev){const P=ev.filter(x=>x.type==='susp');return`<section><h2>Strafen (${P.length})</h2><div class="two"><div>${tbl('Gegner',tally(P.filter(x=>x.pt==='opp'),x=>x.sk+' · Nr. '+x.nr))}</div><div>${tbl('Eigene Mannschaft',tally(P.filter(x=>x.pt==='own'),x=>x.sk+' · '+pn(x.by)))}</div></div></section>`}
+const evTitle=()=>{const g=S.games.find(x=>x.id===evalSel);return g?'Spielanalyse: '+g.date+' gegen '+g.opp:'Spielanalyse: alle Spiele'};
+async function saveFile(name,blob){const f=new File([blob],name,{type:blob.type});
+if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:name});return}catch(e){if(e.name==='AbortError')return}}
+const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},4000)}
+function doPdf(){const R=document.documentElement,old=R.getAttribute('data-theme');R.setAttribute('data-theme','light');const r=()=>{old===null?R.removeAttribute('data-theme'):R.setAttribute('data-theme',old);window.removeEventListener('afterprint',r)};window.addEventListener('afterprint',r);setTimeout(()=>window.print(),80)}
+async function doCsv(){const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"',H=['Datum','Gegner','Halbzeit','Minute','Mannschaft','Angriffsart','Ereignis','Beschreibung','Position','Abstand','Wurfziel hoch/halbhoch/unten','Wurfziel kurz/zentral/lang','Detail'];
+const R=S.games.flatMap(g=>g.events.map(x=>[g.date,g.opp,x.half||'',x.min||'',(x.type==='susp'?x.pt:x.team)==='own'?'Wir':'Gegner',x.art||'',TL[x.type],descr(x),x.pos||'',x.dist||'',x.v||'',x.h||'',RES[x.res]||x.cause||x.sk||'']));
+const csv='\ufeff'+[H,...R].map(r=>r.map(q).join(';')).join('\r\n');try{await saveFile('handball-ereignisse.csv',new Blob([csv],{type:'text/csv'}));msg=''}catch(e){msg=e&&e.code==='declined'?'':'Der Export ist in dieser Ansicht nicht verfügbar.'}render()}
+/* Ereignisse */
+document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;
+if(t.dataset.tab){tab=t.dataset.tab;msg='';return render()}
+if(t.dataset.set){const k=t.dataset.set,v=t.dataset.v;rd();if(k==='team'||k==='type'){D.team=k==='team'?v:D.team;D.type=k==='type'?v:D.type;D={team:D.team,art:D.art,type:D.type}}else D[k]=D[k]===v&&k!=='art'?undefined:v;msg='';return render()}
+if(t.dataset.grid){rd();const[v,h]=t.dataset.grid.split('|');D.v=v;D.h=h;return render()}
+if(t.dataset.undo){const g=game();g.events=g.events.filter(x=>x.id!==t.dataset.undo);save();return render()}
+if(t.dataset.edit){editId=t.dataset.edit;return render()}
+if(t.dataset.delp){if(confirm('Spieler wirklich löschen? Bereits erfasste Ereignisse bleiben erhalten.')){S.players=S.players.filter(x=>x.id!==t.dataset.delp);save();render()}return}
+if(t.dataset.delf){S.fields=S.fields.filter(x=>x!==t.dataset.delf);save();return render()}
+if(t.dataset.open){S.cur=t.dataset.open;tab='live';D=newDraft();save();return render()}
+if(t.dataset.delg){if(confirm('Spiel mit allen Ereignissen löschen?')){S.games=S.games.filter(x=>x.id!==t.dataset.delg);if(S.cur===t.dataset.delg)S.cur=null;save();render()}return}
+switch(t.dataset.act){
+case'newgame':{const o=$('#gopp').value.trim()||'Gegner',g={id:uid(),opp:o,date:$('#gdate').value,events:[]};S.games.push(g);S.cur=g.id;save();return render()}
+case'clock':{const g=game();if(g.run){g.sec=cur(g);g.run=null}else g.run=Date.now();save();return render()}
+case'half':{const g=game();if((g.half||1)===1){g.half=2;g.sec=Math.max(cur(g),1800);g.run=null}else g.half=1;save();return render()}
+case'closegame':S.cur=null;save();return render();
+case'saveev':rd();return saveEv();
+case'savep':return saveP();
+case'cancelp':editId=null;msg='';return render();
+case'addf':{const f=$('#newf').value.trim();if(f&&!S.fields.includes(f)){S.fields.push(f);save()}return render()}
+case'export':return doExport();case'csv':return doCsv();case'pdf':return doPdf()}});
+function rd(){const n=$('#nr');if(n)D.nr=n.value}
+document.addEventListener('change',async e=>{if(e.target.id==='esel'){evalSel=e.target.value;render()}
+if(e.target.id==='imp'&&e.target.files[0]){try{const j=JSON.parse(await e.target.files[0].text());if(!Array.isArray(j.players)||!Array.isArray(j.games))throw 0;if(!confirm('Alle vorhandenen Daten werden ersetzt. Fortfahren?'))return;S.players=j.players;S.fields=j.fields||[];S.games=j.games;S.cur=null;save();msg='Import erfolgreich.'}catch(x){msg='Die Datei ist keine gültige Sicherung.'}render()}});
+if('serviceWorker' in navigator&&location.protocol.indexOf('http')===0)navigator.serviceWorker.register('sw.js').catch(()=>{});
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch(e){}
+load().then(()=>{if(S.cur&&!game())S.cur=null;render()});
+</script></body></html>

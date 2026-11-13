@@ -10,4 +10,4 @@ Daten liegen im Speicher des iPads. Regelmäßig "In Dateien sichern" (Spiele-Ta
 
 Am Computer: index.html direkt im Browser öffnen (ohne Offline-Installation).
 
-Neue Version: Dateien ersetzen und in sw.js "handball-v4" hochzählen (z. B. handball-v5).
+Neue Version: Dateien ersetzen und in sw.js "handball-v5" hochzählen (z. B. handball-v6).

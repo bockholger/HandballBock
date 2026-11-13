@@ -68,6 +68,7 @@ body.fit main{flex:1;min-height:0;width:100%;max-width:none;padding:8px;display:
 #ov{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:50;display:flex;align-items:center;justify-content:center;padding:8px}
 #ov .box{background:var(--sf);color:var(--tx);border-radius:10px;padding:12px;max-height:96dvh;max-width:100%;overflow:auto}
 #ov .ng{display:grid;grid-template-columns:repeat(10,56px);gap:5px}#ov .ng .chip{height:50px;padding:0;font-size:20px}
+.fr.off,.goalw.off{opacity:.35;filter:grayscale(1)}.goalw.off{pointer-events:none}.chip:disabled{cursor:not-allowed}
 </style></head>
 <body>
 <header><h1>Handball Spielanalyse</h1>
@@ -101,20 +102,21 @@ const[o,e]=score(g),opp=D.team==='opp',susp=D.type==='susp',gm=D.type==='goal'||
 const row=(l,c)=>`<div class="fr"><span class="fl">${l}</span><div class="fc">${c}</div></div>`;
 const nr=`<button class="chip ${D.nr!==undefined&&D.nr!==''?'on':''}" data-act="nrpick" style="min-width:150px;font-size:20px">${D.nr!==undefined&&D.nr!==''?'Nr. '+D.nr:'Nr. wählen'}</button>`;
 const gkc=S.players.filter(p=>p.pos==='Tor').map(p=>[p.id,p.name]),gsel=curGk(g);let L='';
+const off=!gm,R=(l,c,o)=>`<div class="fr${o?' off':''}"><span class="fl">${l}</span><div class="fc">${o?c.replace(/<button/g,'<button disabled tabindex="-1"'):c}</div></div>`;
 if(!susp)L+=row('Angriff',chips('team',[['opp','Gegner'],['own','Wir']],D.team))+row('Art',chips('art',ART,D.art));
 L+=row('Ereignis',chips('type',[['goal','Tor'],['loss','Ballverlust'],['miss','Fehlwurf'],['circle','Kreis betreten (Fehler)'],['susp','Strafe']],D.type));
 if(susp){L+=row('Bestraft',chips('pt',[['opp','Gegner'],['own','Wir']],D.pt))+row('Strafe',chips('sk',['2 Minuten','Rote Karte'],D.sk));
  if(D.pt==='own')L+=row('Spieler',plChips('by',D.by));else if(D.pt==='opp')L+=row('Gegner Nr.',nr)}
 else if(gm){if(D.type==='miss')L+=row('Wurf',chips('res',Object.entries(RES),D.res));
- L+=row(opp?'Gegner Nr.':'Schütze',opp?nr:plChips('shooter',D.shooter))+row('Position',chips('pos',POS.slice(1),D.pos))+row('Abstand',chips('dist',DIST,D.dist));
- if(opp&&gkc.length)L+=row('Torhüter',chips('gk',gkc,gsel))}
-else if(D.type==='circle'){L+=row(opp?'Gegner Nr.':'Spieler',opp?nr:plChips('by',D.by))+row('Position',chips('pos',POS.slice(1),D.pos))}
-else{L+=row('Ursache',chips('cause',opp?[['prov','Fehler provoziert'],['steal','Ball gestohlen'],['tech','Technischer Fehler']]:[['prov','Fehler provoziert'],['steal','Ball gestohlen'],['tech','Technischer Fehler']],D.cause));
+ L+=row(opp?'Gegner Nr.':'Schütze',opp?nr:plChips('shooter',D.shooter))}
+else if(D.type==='circle')L+=row(opp?'Gegner Nr.':'Spieler',opp?nr:plChips('by',D.by));
+else{L+=row('Ursache',chips('cause',[['prov','Fehler provoziert'],['steal','Ball gestohlen'],['tech','Technischer Fehler']],D.cause));
  if(D.cause==='prov'||D.cause==='steal')L+=opp?row('Eigener Sp.',plChips('by',D.by)):row('Gegner Nr.',nr);
- if(D.cause==='tech')L+=opp?row('Gegner Nr.',nr):row('Eigener Sp.',plChips('by',D.by));
- L+=`<p class="muted" style="margin:4px 0">${opp?'Gegner im Angriff: Fehler provoziert oder Ball gestohlen durch einen eigenen Spieler.':'Wir im Angriff: Fehler provoziert oder Ball gestohlen durch eine gegnerische Nummer; technischer Fehler optional mit eigenem Spieler.'}</p>`}
-const cells=VER.map(v=>HOR.map(h=>`<button class="chip ${D.v===v&&D.h===h?'on':''}" data-grid="${v}|${h}">${v}<br>${h}</button>`).join('')).join('');
-const goal=gm?`<div class="goal"><i class="cb"></i><i class="lp"></i><i class="rp"></i><div class="gc">${cells}</div></div><small class="muted">Wurfziel${D.type==='miss'?' (optional)':''} · Blick vom Werfer: kurz = nah, lang = fern</small>`:'';
+ if(D.cause==='tech')L+=opp?row('Gegner Nr.',nr):row('Eigener Sp.',plChips('by',D.by))}
+L+=R('Position',chips('pos',POS.slice(1),D.pos),off)+R('Abstand',chips('dist',DIST,D.dist),off);
+if(opp&&gkc.length)L+=R('Torhüter',chips('gk',gkc,gsel),off);
+const cells=VER.map(v=>HOR.map(h=>`<button class="chip ${D.v===v&&D.h===h?'on':''}" data-grid="${v}|${h}"${gm?'':' disabled tabindex="-1"'}>${v}<br>${h}</button>`).join('')).join('');
+const goal=`<div class="goalw${gm?'':' off'}"><div class="goal"><i class="cb"></i><i class="lp"></i><i class="rp"></i><div class="gc">${cells}</div></div><small class="muted">Wurfziel${D.type==='miss'?' (optional)':''} · Blick vom Werfer: kurz = nah, lang = fern</small></div>`;
 const log=g.events.slice().reverse().map(x=>`<div class="${x.team}"><span>${x.min?x.min+'. Min · ':''}${(x.type==='susp'?x.pt:x.team)==='own'?'Wir':'Gegner'} · ${TL[x.type]} · ${esc(descr(x))}</span><button class="chip" style="min-height:34px;padding:2px 10px;color:var(--bad)" data-undo="${x.id}" aria-label="Löschen">×</button></div>`).join('')||'<span class="muted">Noch keine Ereignisse.</span>';
 return`<div class="sb"><div class="tm"><small>Wir</small><b>${o}</b></div><div class="mid"><div id="clk" class="${g.run?'run':''}">${fmt(g)}</div><small>${g.run?'● Uhr läuft':'■ Uhr steht'} · ${g.half||1}. Halbzeit · ${g.date}</small></div><div class="tm r"><small>${esc(g.opp)}</small><b>${e}</b></div><div class="ctl"><button class="btn" data-act="clock">${g.run?'Uhr stoppen':'Uhr starten'}</button><button class="btn sec" data-act="half">${(g.half||1)===1?'2. Halbzeit':'Zur 1. HZ'}</button><button class="btn sec" data-act="closegame">Schließen</button></div></div>
 <div class="lv ${susp?(D.pt||'own'):D.team}"><div class="lf">${L}</div><div class="lr">${goal}<p class="msg">${esc(msg)}</p><button class="btn big" data-act="saveev">Speichern</button><div class="log">${log}</div></div></div>`}
@@ -157,7 +159,7 @@ const hm=`<h3>Wurfziel</h3><table class="hm"><tr><th></th>${HOR.map(h=>`<th styl
 const lc={prov:'Fehler provoziert',steal:'Ball gestohlen',tech:'Technischer Fehler'};
 return`<section class="${opp?'opp':'own'}"><h2>${opp?'Gegner im Angriff':'Wir im Angriff'}: ${G.length} Tore bei ${G.length+M.length} Würfen (${G.length+M.length?Math.round(G.length/(G.length+M.length)*100):0} %), ${LC.length} Ballverluste (davon ${C.length} Kreisübertritte)</h2><div class="two"><div>
 ${tbl('Tore nach Angriffsart',tally(G,x=>x.art))}${tbl('Tore nach Position',tally(G,x=>x.pos))}${tbl('Tore nach Abstand',tally(G,x=>x.dist))}${hm}${tbl(opp?'Tore je Gegner (Nr.)':'Tore je Spieler',tally(G,x=>opp?'Nr. '+x.nr:pn(x.shooter)))}</div><div>
-${tbl('Kreisübertritte nach Position',tally(C,x=>x.pos))}${tbl(opp?'Kreisübertritte je Gegner (Nr.)':'Kreisübertritte je Spieler',tally(C,x=>opp?(x.nr!==undefined?'Nr. '+x.nr:undefined):(x.by?pn(x.by):undefined)))}${tbl('Fehlwürfe nach Ergebnis',tally(M,x=>RES[x.res]))}${tbl('Ballverluste nach Angriffsart',tally(LC,x=>x.art))}${tbl('Ballverluste nach Ursache',tally(LC,x=>x.type==='circle'?'Kreisübertritt':lc[x.cause]))}
+${tbl(opp?'Kreisübertritte je Gegner (Nr.)':'Kreisübertritte je Spieler',tally(C,x=>opp?(x.nr!==undefined?'Nr. '+x.nr:undefined):(x.by?pn(x.by):undefined)))}${tbl('Fehlwürfe nach Ergebnis',tally(M,x=>RES[x.res]))}${tbl('Ballverluste nach Angriffsart',tally(LC,x=>x.art))}${tbl('Ballverluste nach Ursache',tally(LC,x=>x.type==='circle'?'Kreisübertritt':lc[x.cause]))}
 ${opp?tbl('Fehler provoziert (eigene Spieler)',tally(L.filter(x=>x.cause==='prov'),x=>pn(x.by)))+tbl('Bälle gestohlen (eigene Spieler)',tally(L.filter(x=>x.cause==='steal'),x=>pn(x.by))):tbl('Provoziert/gestohlen von Gegner (Nr.)',tally(L.filter(x=>x.cause!=='tech'),x=>'Nr. '+x.nr))+tbl('Technische Fehler (eigene Spieler)',tally(L.filter(x=>x.cause==='tech'&&x.by),x=>pn(x.by)))}</div></div></section>`}
 function vEval(){if(evalSel!=='all'&&!S.games.some(g=>g.id===evalSel))evalSel='all';const gs=evalSel==='all'?S.games:S.games.filter(g=>g.id===evalSel),ev=gs.flatMap(g=>g.events.map(x=>({...x,ph:phase(g,x)})));
 return`<section class="noprint"><h2>Auswertung</h2><label>Spiel<select id="esel"><option value="all">Alle Spiele (${S.games.length})</option>${S.games.map(g=>`<option value="${g.id}" ${evalSel===g.id?'selected':''}>${g.date} gegen ${esc(g.opp)}</option>`).join('')}</select></label><p class="muted">${ev.length} Ereignisse</p><button class="btn" data-act="pdf">Auswertung drucken / als PDF sichern</button><p class="msg">${esc(msg)}</p></section><div id="evpdf"><h2 style="margin:4px 0 8px">${esc(evTitle())}</h2>${team('opp',ev)}${gkv(ev)}${team('own',ev)}${phases(ev)}${pen(ev)}</div>`}

@@ -1,0 +1,13 @@
+Handball Spielanalyse - Offline-App
+
+Dateien: index.html, manifest.webmanifest, sw.js, icon-180.png, icon-512.png (alle im selben Ordner lassen).
+
+Auf dem iPad (wie eine App, ohne Claude-Konto, danach ohne Internet):
+1. Den Ordner einmalig auf einen beliebigen statischen Webspace legen (z. B. GitHub Pages, Netlify, eigener Webspace, Vereins- oder Schulserver). Die Adresse muss mit https:// beginnen.
+2. Die Adresse im iPad in Safari öffnen, Teilen -> "Zum Home-Bildschirm".
+3. Einmal mit Internet starten und kurz warten. Danach läuft die App offline.
+Daten liegen im Speicher des iPads. Regelmäßig "In Dateien sichern" (Spiele-Tab) nutzen.
+
+Am Computer: index.html direkt im Browser öffnen (ohne Offline-Installation).
+
+Neue Version: Dateien ersetzen und in sw.js "handball-v4" hochzählen (z. B. handball-v5).
